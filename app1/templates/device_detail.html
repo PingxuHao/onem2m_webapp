@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Details</title>
+</head>
+<body>
+    <h1>{{ device.name }} Details</h1>
+    <p>Type: {{ device.type }}</p>
+    <p>Manufacturer: {{ device.manufacturer }}</p>
+    <p>SW Version: {{ device.sw_version }} <button onclick="showUploadForm()">Update</button></p>
+    <p>Battery Level: {{ device.battery_level }}</p>
+    <p>HW Model#: {{ device.hw_model }}</p>
+    <p>MAC Address: {{ device.mac_address }}</p>
+
+    <div id="uploadForm" style="display: none;">
+
+    </div>
+
+    <script>
+        function showUploadForm() {
+            document.getElementById('uploadForm').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
