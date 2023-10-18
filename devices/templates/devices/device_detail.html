@@ -1,0 +1,26 @@
+{% extends "main/base.html" %}
+{% block content %}
+    <article class="media content-section">
+        <div class="media-body">
+        <h2 class="article-title">{{ object.model_name }}</h2>
+        <p class="article-content">
+            IP Address: {{ object.ip_address }}<br>
+            Status: {{ object.status|yesno:"Online,Offline" }}<br>
+            MAC Address: {{ object.mac_address }}<br>
+            IMEI Number: {{ object.imei_number }}<br>
+            Device Type: {{ object.device_type }}<br>
+            OS Version: {{ object.os_version }}<br>
+            Firmware Version: {{ object.firmware_version }}<br>
+            Storage: {{ object.storage_capacity }} MB/GB<br>
+            RAM: {{ object.ram_capacity }} MB/GB<br>
+            CPU Info: {{ object.cpu_info }}<br>
+            Wireless: {{ object.is_wireless|yesno:"Yes,No" }}<br>
+            Wireless Protocols: {{ object.wireless_protocols }}<br>
+            Battery Status: {{ object.battery_status }}%
+        </p>
+        </div>
+        
+
+    </article>
+
+{% endblock content %}

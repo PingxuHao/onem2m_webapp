@@ -1,0 +1,78 @@
+{% extends "main/base.html" %}
+{% block content %}
+<a href="{% url 'devices' %}">Check my devices</a>
+
+<form id="mqttForm" method="post" action="{% url 'send_mqtt_on' %}">  <!-- Note the 'id' for targeting -->
+    {% csrf_token %}
+    <button type="submit">TURN ON LED</button>
+</form>
+<form id="mqttForm_off" method="post" action="{% url 'send_mqtt_off' %}">  <!-- Note the 'id' for targeting -->
+      {% csrf_token %}
+      <button type="submit">TURN OFF LED</button>
+  </form>
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+document.getElementById("mqttForm").addEventListener("submit", function(event){
+    event.preventDefault();   // Prevent the form from submitting the traditional way
+
+    var url = this.action;    // The URL to send the request to (from your form's 'action' attribute)
+    var formData = new FormData(this);  // Creates a new FormData object, passing in the form
+
+    fetch(url, {              // Sends the request
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')  // Send the CSRF token with the request
+        },
+        body: formData        // This is your post data (which includes the CSRF token)
+    })
+    .then(response => response.json())  // If you expect a JSON response, you can parse it like this
+    .then(data => {
+        // Handle the JSON response here. This could be confirmation message or any data returned from the server.
+        console.log(data);
+        // for example, you can show an alert or update part of the page with the response data.
+    })
+    .catch(error => {
+        // If there's an error during the fetch, you can log it here.
+        console.error('Error:', error);
+    });
+});
+
+
+document.getElementById("mqttForm_off").addEventListener("submit", function(event){
+    event.preventDefault();   // Prevent the form from submitting the traditional way
+
+    var url = this.action;    // The URL to send the request to (from your form's 'action' attribute)
+    var formData = new FormData(this);  // Creates a new FormData object, passing in the form
+
+    fetch(url, {              // Sends the request
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')  // Send the CSRF token with the request
+        },
+        body: formData        // This is your post data (which includes the CSRF token)
+    })
+    .then(response => response.json())  // If you expect a JSON response, you can parse it like this
+    .then(data => {
+        // Handle the JSON response here. This could be confirmation message or any data returned from the server.
+        console.log(data);
+        // for example, you can show an alert or update part of the page with the response data.
+    })
+    .catch(error => {
+        // If there's an error during the fetch, you can log it here.
+        console.error('Error:', error);
+    });
+});
+
+
+
+
+
+
+
+</script>
+
+{% endblock content %}

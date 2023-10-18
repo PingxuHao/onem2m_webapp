@@ -1,0 +1,12 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block content %}
+    {% for device in devices %}
+        <article class="media content-section">
+          <img src="{% static '/main/'|add:device.model_name|add:'.png' %}" alt="{{ device.model_name }}" width="50" >
+          <div class="media-body">
+            <h2 class="article-title"><a href= "{% url 'device-detail' device.id %}" > {{ device.model_name }} </a></h2>
+          </div>
+        </article>
+    {% endfor %}
+{% endblock content %}
