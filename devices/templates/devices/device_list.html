@@ -1,12 +1,207 @@
 {% extends "main/base.html" %}
 {% load static %}
+
 {% block content %}
-    {% for device in devices %}
-        <article class="media content-section">
-          <img src="{% static '/main/'|add:device.model_name|add:'.png' %}" alt="{{ device.model_name }}" width="50" >
-          <div class="media-body">
-            <h2 class="article-title"><a href= "{% url 'device-detail' device.id %}" > {{ device.model_name }} </a></h2>
+<script>
+  // Wait for the DOM to be loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    // Attach a 'submit' event listener to the 'mqttForm' form
+    document.getElementById('mqttForm').addEventListener('submit', function(e) {
+      // Prevent the default form submission behavior
+      e.preventDefault();
+  
+      // Perform an AJAX request to the 'send_mqtt_on' URL
+      fetch("{% url 'send_mqtt_on' %}", {
+        method: 'POST',
+        headers: {
+          // Add CSRF token header
+          'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams(new FormData(this)).toString()
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+        // Handle success
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        // Handle error
+      });
+    });
+  
+    // Attach a 'submit' event listener to the 'mqttForm_off' form
+    document.getElementById('mqttForm_off').addEventListener('submit', function(e) {
+      // Prevent the default form submission behavior
+      e.preventDefault();
+  
+      // Perform an AJAX request to the 'send_mqtt_off' URL
+      fetch("{% url 'send_mqtt_off' %}", {
+        method: 'POST',
+        headers: {
+          // Add CSRF token header
+          'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams(new FormData(this)).toString()
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+        // Handle success
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        // Handle error
+      });
+    });
+  
+  });
+  </script>
+  
+
+<style>
+  /* Adjust the sidebar width by modifying the padding and margins */
+  .sidebar {
+    padding-right: 15px; /* Add more padding to the right of the sidebar */
+    padding-left: 15px;  /* Add more padding to the left of the sidebar */
+  }
+
+  /* Style for the device boxes in the sidebar */
+  .device-box {
+    background-color: #fff; /* White background for the text */
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+  }
+
+  /* Style for the toggle button */
+  .toggle-button {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    margin-left: 10px; /* Space between the text and the toggle */
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+  }
+
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .toggle-slider {
+    background-color: #2196F3;
+  }
+
+  input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+  }
+  .sidebar-sticky .sidebar {
+    background-color: white;
+    width: 600px; /* Adjust the width as needed */
+}
+</style>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main content -->
+        <div class="col-lg-9">
+            <script>
+                // Function to simulate connecting to devices
+                function connectToDevice(button, deviceId) {
+                    var progressBar = document.getElementById('progress-' + deviceId);
+                    var statusIndicator = document.getElementById('status-' + deviceId);
+
+                    progressBar.style.visibility = 'visible';
+                    button.disabled = true; // Disable the button while connecting
+                    var progress = 0;
+                    var interval = setInterval(function() {
+                        progress += 10;
+                        progressBar.value = progress;
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            progressBar.style.visibility = 'hidden'; 
+                            statusIndicator.textContent = 'Online';
+                            statusIndicator.classList.add('online');
+                            button.textContent = 'Disconnect';
+                            button.disabled = false; 
+                        }
+                    }, 100);
+                }
+            </script>
+
+            <!-- Loop through each device and create its representation on the page -->
+            {% for device in devices %}
+                <div class="device-box">
+                    <article class="media content-section">
+                        <img class="device-image mr-3" src="{% static '/main/'|add:device.model_name|add:'.png' %}" alt="{{ device.model_name }}" width="50">
+                        <div class="media-body">
+                            <div class="device-control">
+                                <h5 class="article-title mb-0"><a href="{% url 'device-detail' device.id %}">{{ device.model_name }}</a></h5>
+                                <div>
+                                    <span id="status-{{ device.id }}" class="device-status offline">Offline</span>
+                                    <button onclick="connectToDevice(this, '{{ device.id }}')" class="btn btn-outline-primary btn-sm">Connect</button>
+                                </div>
+                            </div>
+                            <progress id="progress-{{ device.id }}" value="0" max="100" style="visibility: hidden; width: 100%;"></progress>
+                        </div>
+                    </article>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="col-lg-3 ml-auto">
+          <div class="sidebar-sticky">
+              <div class="sidebar">
+                  <h4>Project</h4>
+                  <div id="iphone-bluetooth-tester" class="p-3 mb-3 bg-light rounded">
+                      <h5>iPhone Bluetooth Tester</h5>
+
+                      <form id="mqttForm" method="post" action="{% url 'send_mqtt_on' %}">  <!-- Note the 'id' for targeting -->
+                        {% csrf_token %}
+                        <button type="submit">ON</button>
+                    </form>
+                    <form id="mqttForm_off" method="post" action="{% url 'send_mqtt_off' %}">  <!-- Note the 'id' for targeting -->
+                          {% csrf_token %}
+                          <button type="submit">OFF</button>
+                      </form>
+
+                      <div class="device-connection-tree p-3 bg-light rounded">
+                        <h5>Device Connections</h5>
+                        <ul class="list-unstyled">
+                            <li class="device-box">thingy_91
+                                <ul>
+                                    <li class="device-box">esp_32</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                  </div>
+                  
+              </div>
           </div>
-        </article>
-    {% endfor %}
+      </div>
+  </div>
+</div>
 {% endblock content %}

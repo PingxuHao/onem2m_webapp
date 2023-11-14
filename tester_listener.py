@@ -2,7 +2,8 @@ import paho.mqtt.client as mqtt
 
 MQTT_SERVER = "52.14.47.13"
 MQTT_PORT = 1883
-SUBSCRIBE_TOPIC = "/oneM2M/resp/aqm/capstone-iot/json"
+#SUBSCRIBE_TOPIC = "/oneM2M/resp/aqm/capstone-iot/json"
+SUBSCRIBE_TOPIC = "/update/esp32"
 OUTPUT_FILE = "messages.txt"  
 def on_connect(client, userdata, flags, rc):
     print(f"Connected with result code {str(rc)}")

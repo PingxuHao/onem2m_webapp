@@ -2,7 +2,11 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 
-
+class MQTTMessage(models.Model):
+    topic = models.CharField(max_length=255)
+    payload = models.TextField()
+    is_base64_encoded = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
 class Device(models.Model):
     id = models.PositiveIntegerField(blank=True, primary_key=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null = True)

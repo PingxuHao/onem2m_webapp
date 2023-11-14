@@ -1,5 +1,14 @@
 {% extends "main/base.html" %}
 {% block content %}
+
+<script>
+    window.addEventListener('load', function() {
+        window.location.href = "{% url 'devices' %}";  // Replace 'new_target_url_name' with the name of your target URL.
+    });
+</script>
+
+
+
 <a href="{% url 'devices' %}">Check my devices</a>
 
 <form id="mqttForm" method="post" action="{% url 'send_mqtt_on' %}">  <!-- Note the 'id' for targeting -->
