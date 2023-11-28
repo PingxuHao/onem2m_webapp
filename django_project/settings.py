@@ -15,6 +15,15 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+AWS_ACCESS_KEY_ID = 'AKIARBMG47KIYIWFZVVN'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'one-m2m-demo'
+AWS_S3_SIGNATURE_NAME = 's3v4',
+AWS_S3_REGION_NAME = 'us-east-2'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL =  None
+AWS_S3_VERITY = True
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
