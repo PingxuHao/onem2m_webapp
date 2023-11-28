@@ -70,12 +70,14 @@ def display_messages(request):
     messages = MQTTMessage.objects.all()
     return render(request, 'messages.html', {'messages': messages})
 
+from devices.models import Device 
+
 def home(request):
+    devices = Device.objects.all()  # Query all Device objects
     context = {
-        
+        'devices': devices  # Pass the devices to the context
     }
     return render(request, 'main/home.html', context)
-
 
 def about(request):
     return render(request, 'main/about.html', {'title': 'About'})

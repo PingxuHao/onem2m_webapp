@@ -1,6 +1,89 @@
 {% extends "main/base.html" %}
+{% load static %}
 {% block content %}
-<!-- Your HTML content for my_project goes here -->
-<h1>My Project</h1>
-<p>Welcome to my project page!</p>
+
+<!-- Top Row with Back Button and Application Name -->
+<div class="row align-items-center my-4">
+  <div class="col-md-2">
+    <a href="{% url 'devices' %}" class="btn btn-secondary">&lt;&lt; Back</a>
+  </div>
+  <div class="col-md-8 text-center">
+    <h1>APPLICATION NAME</h1>
+  </div>
+  <div class="col-md-2"></div>
+</div>
+
+<!-- Tractor Position and Firmware Information -->
+<div class="row">
+  <!-- Tractor Position Container -->
+  <iframe src="{% static 'main/tester.html' %}" width="700" height="400" style="border:none; overflow:hidden; margin-left:20px;" scrolling="no"></iframe>
+
+  <!-- Firmware and Device List -->
+  <div class="col-md-offset-3 col-md-4" style="margin-left: 20px;">
+
+    <div class="firmware-info">
+      <h4>Current Firmware: xxx</h4>
+      <button class="btn btn-primary">Update</button>
+    </div>
+
+    <!-- Device List -->
+    <div class="device-list mt-4">
+      <h5>Devices:</h5>
+      <ul class="list-unstyled">
+        <li>Device 1</li>
+        <li>Device 2</li>
+        <li>Device 3</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="row">
+      <!-- Main content -->
+      <div class="col-lg-9">
+          <script>
+              // Function to simulate connecting to devices
+              function connectToDevice(button, deviceId) {
+                  var progressBar = document.getElementById('progress-' + deviceId);
+                  var statusIndicator = document.getElementById('status-' + deviceId);
+                  progressBar.style.visibility = 'visible';
+                  button.disabled = true; // Disable the button while connecting
+                  var progress = 0;
+                  var interval = setInterval(function() {
+                      progress += 10;
+                      progressBar.value = progress;
+                      if (progress >= 100) {
+                          clearInterval(interval);
+                          progressBar.style.visibility = 'hidden'; 
+                          statusIndicator.textContent = 'Online';
+                          statusIndicator.classList.add('online');
+                          button.textContent = 'Disconnect';
+                          button.disabled = false; 
+                      }
+                  }, 100);
+              }
+          </script>
+          <!-- Loop through each device and create its representation on the page -->
+          {% for device in devices %}
+              <div class="device-box">
+                  <article class="media content-section">
+                      <img class="device-image mr-3" src="{% static '/main/'|add:device.model_name|add:'.png' %}" alt="{{ device.model_name }}" width="50">
+                      <div class="media-body">
+                          <div class="device-control">
+                              <h5 class="article-title mb-0"><a href="{% url 'device-detail' device.id %}">{{ device.model_name }}</a></h5>
+                              <div>
+                                  <span id="status-{{ device.id }}" class="device-status offline">Offline</span>
+                                  <button onclick="connectToDevice(this, '{{ device.id }}')" class="btn btn-outline-primary btn-sm">Connect</button>
+                              </div>
+                          </div>
+                          <progress id="progress-{{ device.id }}" value="0" max="100" style="visibility: hidden; width: 100%;"></progress>
+                      </div>
+                  </article>
+              </div>
+          {% endfor %}
+      </div>
+</div>
+</div>
+
 {% endblock %}

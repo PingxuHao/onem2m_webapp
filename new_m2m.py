@@ -24,8 +24,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 appIP = '127.0.0.1 '
 appPort = '8080'
-appID = 'CF2'
-cseIP = '3.13.49.246'
+appID = 'CAdmin'
+cseIP = '3.136.39.208'
 csePort = '8080'
 cseID = 'capstone-iot'
 cseName = 'cse-in'
@@ -51,4 +51,17 @@ def getResId(tag,r):
         #allready created
         resId = ""
     return resId
-createAE("django")
+def createSubscription(resourceName, parentID):
+    payld = { "m2m:sub": { "rn": resourceName, "enc": {"net":[3]}, "nu":[originator],"acpi": ["cse-in/bruh"]} }
+    print ("Sub Create Request")
+    #print (payld)
+    url = 'http://' + cseIP + ':' + csePort + '/' + parentID
+    hdrs = {'X-M2M-RI':"Sub",'X-M2M-Origin':originator, 'X-M2M-RVI':'2a' ,'Content-Type':"application/json;ty=23"}
+    r = requests.post(url, data=dumps(payld), headers=hdrs)
+    print ("SUB Create Response")
+    print (r.text)
+
+    return getResId('m2m:sub',r)
+
+
+createSubscription("bruh_subscriber","cse-in")

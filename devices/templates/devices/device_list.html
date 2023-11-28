@@ -178,11 +178,11 @@
                   <div id="iphone-bluetooth-tester" class="p-3 mb-3 bg-light rounded">
                       <h5>iPhone Bluetooth Tester</h5>
 
-                      <form id="mqttForm" method="post" action="{% url 'send_mqtt_on' %}">  <!-- Note the 'id' for targeting -->
+                      <form id="mqttForm" method="post" action="{% url 'send_mqtt_on' %}"> 
                         {% csrf_token %}
                         <button type="submit">ON</button>
                     </form>
-                    <form id="mqttForm_off" method="post" action="{% url 'send_mqtt_off' %}">  <!-- Note the 'id' for targeting -->
+                    <form id="mqttForm_off" method="post" action="{% url 'send_mqtt_off' %}"> 
                           {% csrf_token %}
                           <button type="submit">OFF</button>
                       </form>
