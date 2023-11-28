@@ -1,1 +1,1 @@
-web gunicorn onem2m-webapp
+web gunicorn django_project.wsgi:application ==log-file -
