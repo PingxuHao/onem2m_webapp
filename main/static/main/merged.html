@@ -1,0 +1,195 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="margin:0px; row align-items-center my-4" style="height:50px; background-color: #f8f9fa; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
+  <div class="col-md-2">
+    <a href="{% url 'devices' %}" class="btn btn-secondary" style="background-color: #4a76a8; border: none; border-radius: 5px; font-weight: bold;">&lt;&lt; Back</a>
+  </div>
+  <div class="col-md-8 text-center">
+    <h1 style="font-family: 'Arial', sans-serif; color: #333;">Train Application Demo</h1>
+  </div>
+  <div class="col-md-2"></div>
+</div>
+
+<script>
+  // Function to fetch and update MQTT message
+  function updateMQTTMessage() {
+      fetch('{% url "latest_message" "debug" %}')  // Update with the correct URL
+          .then(response => response.json())
+          .then(data => {
+              document.getElementById('mqtt-message-content').innerText = data.payload;
+          })
+          .catch(error => console.error('Error:', error));
+  }
+
+  // Poll for new messages every 5 seconds
+  setInterval(updateMQTTMessage, 500);
+</script>
+
+<div class="row">
+    <!-- Container for track and buttons -->
+    <div style="display: flex; flex-direction: column; align-items: center;">
+
+      <!-- Track and Tractor -->
+      <div id="track">
+          <div id="positionDisplay">1</div>
+          <input type="range" id="positionSlider" min="1" max="100" value="1" step="1" style="width: 80%; display: block; margin: auto;">
+      </div>
+      <div id="tractor"></div>
+
+      <!-- Buttons -->
+      <div style="margin-top: 10px;">
+          <button id="startButton" style="margin-right: 5px; padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: #4a76a8; border: none; color: white;">Start</button>
+          <button id="stopButton" style="padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: #6c757d; border: none; color: white;">Stop</button>
+      </div>
+    </div>
+
+
+    
+  <div style="margin: 5; padding: 15px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
+    <h3 style="font-family: 'Arial', sans-serif; color: #333;">Current System Status</h3>
+    
+  <div id="mqtt-message">
+    <h3><span id="mqtt-message-content">.</span></h3>
+  </div>
+  </div>
+
+
+
+
+    <div class="col-md-3" style="margin-left: 0px;">
+        <div class="firmware-info" style="background-color: #f8f9fa; margin-left:15px;  width : 310px; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,.1); display: flex; align-items: center; justify-content: space-between;">
+          <h4 style="color: #555; font-size: 20px;font-family: 'Arial', sans-serif; margin: 0;">
+            Current Firmware:<br>
+            Manual Connection
+          </h4>
+        
+          
+    
+          <button class="btn btn-primary" style="background-color: #5cb85c; border: none; border-radius: 5px;">Update</button>
+          <!-- <button id="mqtt-send-btn">start system</button> -->
+        </div>
+
+        
+    
+        <div class="container-fluid" style="margin-top: 10px;">
+            <div class="row">
+                <div class="col-lg-9">
+                    <script>
+                      // Function to simulate connecting to devices
+                      function connectToDevice(button, deviceId) {
+                          var progressBar = document.getElementById('progress-' + deviceId);
+                          var statusIndicator = document.getElementById('status-' + deviceId);
+      
+                          progressBar.style.visibility = 'visible';
+                          button.disabled = true; // Disable the button while connecting
+                          var progress = 0;
+                          var interval = setInterval(function() {
+                              progress += 10;
+                              progressBar.value = progress;
+                              if (progress >= 100) {
+                                  clearInterval(interval);
+                                  progressBar.style.visibility = 'hidden'; 
+                                  statusIndicator.textContent = 'Online';
+                                  statusIndicator.classList.add('online');
+                                  button.textContent = 'Disconnect';
+                                  button.disabled = false; 
+                              }
+                          }, 100);
+                      }
+                    </script>
+    
+                    <!-- Device Listings -->
+                    {% for device in devices %}
+                        <div class="device-box" style="height:90px; width: 315px;   margin-bottom: 10px; padding: 10px; ; border: 1px solid #e7e7e7; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,.1); background-color: #fff;">
+                            <article class="media content-section" style="background: transparent; width:300px; border: transparent; font-family: 'Arial', sans-serif; ">
+                                <img class="device-image mr-3" src="{% static '/main/'|add:device.model_name|add:'.png' %}" alt="{{ device.model_name }}" width="50">
+                                <div class="media-body">
+                                    <div class="device-control">
+                                        <h5 class="article-title mb-0"><a href="{% url 'device-detail' device.id %}" style="color: #4a76a8;">{{ device.model_name }}</a></h5>
+                                        <div>
+                                            <span id="status-{{ device.id }}" class="device-status offline" style="color: #d9534f;">Offline</span>
+                                            <button onclick="connectToDevice(this, '{{ device.id }}')" class="btn btn-outline-primary btn-sm" style="border-color: #4a76a8; color: #4a76a8; border-radius: 5px;">Connect</button>
+                                        </div>
+                                    </div>
+                                    <progress id="progress-{{ device.id }}" value="0" max="100" style="visibility: hidden; width: 100%; border-radius: 2px;"></progress>
+                                </div>
+                            </article>
+                        </div>
+                    {% endfor %}
+                </div>
+          </div>
+        </div>
+      </div>
+</div>
+
+<!-- Your existing content for device list and other elements -->
+
+<!-- Rest of your existing content... -->
+
+<style>
+  /* Styles from tester.html */
+  #track {
+      z-index: 2;
+      width: 80%;
+      height: 300px;
+      margin: 20px auto;
+      border: 5px solid black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 150px; 
+      position: relative;
+      overflow: hidden;
+  }
+  #tractor {
+      z-index:1;
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background-color: green;
+      border-radius: 25%;
+  }
+  #positionDisplay {
+      visibility: hidden;
+      position: absolute;
+      font-size: 24px;
+      text-align: center;
+      z-index: 1;
+  }
+</style>
+
+<script>
+  /* Script from tester.html */
+  const tractor = document.getElementById('tractor');
+  const slider = document.getElementById('positionSlider');
+  let moving = false;
+
+  function startMoving() {
+      if (moving) {
+          let currentValue = parseInt(slider.value, 10);
+          currentValue = (currentValue + 1) % 100;
+          slider.value = currentValue;
+          updateTractorPosition(currentValue);
+          setTimeout(startMoving, 100);
+      }
+  }
+
+  function updateTractorPosition(position) {
+      // Position calculation logic from tester.html
+  }
+
+  document.getElementById('startButton').addEventListener('click', function() {
+      moving = true;
+      startMoving();
+  });
+
+  document.getElementById('stopButton').addEventListener('click', function() {
+      moving = false;
+  });
+
+  updateTractorPosition(1); // Initial position
+</script>
+
+{% endblock %}

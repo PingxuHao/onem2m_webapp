@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stadium Track Tractor Simulation</title>
+    <style>
+        #track {
+            z-index: 2;
+            width: 80%;
+            height: 300px;
+            width: 600px;
+            margin: 20px auto;
+            border: 5px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 150px; 
+            position: relative;
+            overflow: hidden;
+        }
+        #tractor {
+            z-index:1;
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: green;
+            border-radius: 25%;
+        }
+        #positionDisplay {
+            visibility: hidden;
+            position: absolute;
+            font-size: 24px;
+            text-align: center;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div id="track">
+    <div id="positionDisplay">1</div>
+</div>
+<div id="tractor"></div>
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script>
+    const track = document.getElementById('track');
+    const tractor = document.getElementById('tractor');
+    const positionDisplay = document.getElementById('positionDisplay');
+
+    function updateTractorPosition(position) {
+    const halfCircleCircumference = Math.PI * 150;
+    const straightLineLength = 300;
+    const totalLength = 2 * halfCircleCircumference + 2 * straightLineLength;  
+    
+    const positionLength = (position / 100) * totalLength;
+    const mod3 = 230;
+    let x, y;
+    if (position < 25) {
+        x = (14 * (position- 1));
+        x -= mod3;
+        x -= 20;
+        y = 0;
+        
+    } else if ((25 <= position )&& (position<50)) {
+        const angle = 7.2;
+        x = (150 * Math.sin(angle*(position - 25)* (3.141593/180))) + 450;
+        x -= mod3;
+        x -= 150;
+        y = -150 * Math.cos(angle*(position - 25)* (3.141593/180)) + 150;
+
+    } else if ((50 <= position)&&(position <= 75)) {
+        
+        x = 435 - (position - 50)*12 ;
+        x -= mod3;
+        x -= 110
+        y = 300;
+
+    } else {
+        const angle = 7.2;
+        x = -(150 * Math.sin(angle*(position - 25)* (3.141593/180))) +150;
+        x -= 390;
+        y = 150 * Math.cos(angle*(position - 25)* (3.141593/180)) + 150;
+    }
+    x += 420;
+    y += 10;
+    
+    tractor.style.left = x + 'px';
+    tractor.style.top = y + 'px';
+    positionDisplay.textContent = 'Position: ' + position + ', Coordinates: (' + x.toFixed(2) + ', ' + y.toFixed(2) + ')';
+    }
+
+    // Connect to MQTT Broker
+    const client = mqtt.connect('ws://52.14.47.13:1883'); // Replace with your MQTT broker URL and port
+
+    client.on('connect', function () {
+        client.subscribe('/RaspberryPi/Data', function (err) {
+            if (!err) {
+                console.log('Subscribed to tractor/position');
+            }
+        });
+    });
+
+    client.on('message', function (topic, message) {
+        // Parse message as JSON
+        const data = JSON.parse(message.toString());
+        if (data.type === "Train Location") {
+            const position = parseInt(data.location, 10);
+            updateTractorPosition(position);
+        }
+    });
+
+    updateTractorPosition(1); // Initial position
+</script>
+
+</body>
+</html>

@@ -138,3 +138,8 @@ LOGIN_REDIRECT_URL = 'main-home'
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 django_heroku.settings(locals())
+MQTT_SERVER = '52.14.47.13'
+MQTT_PORT = 1883
+MQTT_KEEPALIVE = 60
+MQTT_USER = ''
+MQTT_PASSWORD = ''

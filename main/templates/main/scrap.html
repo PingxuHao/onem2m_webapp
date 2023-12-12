@@ -2,51 +2,286 @@
 {% load static %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Main content -->
-        <div class="col-lg-9">
-            <script>
-                // Function to simulate connecting to devices
-                function connectToDevice(button, deviceId) {
-                    var progressBar = document.getElementById('progress-' + deviceId);
-                    var statusIndicator = document.getElementById('status-' + deviceId);
-                    progressBar.style.visibility = 'visible';
-                    button.disabled = true; // Disable the button while connecting
-                    var progress = 0;
-                    var interval = setInterval(function() {
-                        progress += 10;
-                        progressBar.value = progress;
-                        if (progress >= 100) {
-                            clearInterval(interval);
-                            progressBar.style.visibility = 'hidden'; 
-                            statusIndicator.textContent = 'Online';
-                            statusIndicator.classList.add('online');
-                            button.textContent = 'Disconnect';
-                            button.disabled = false; 
-                        }
-                    }, 100);
-                }
-            </script>
-            <!-- Loop through each device and create its representation on the page -->
-            {% for device in devices %}
-                <div class="device-box">
-                    <article class="media content-section">
-                        <img class="device-image mr-3" src="{% static '/main/'|add:device.model_name|add:'.png' %}" alt="{{ device.model_name }}" width="50">
-                        <div class="media-body">
-                            <div class="device-control">
-                                <h5 class="article-title mb-0"><a href="{% url 'device-detail' device.id %}">{{ device.model_name }}</a></h5>
-                                <div>
-                                    <span id="status-{{ device.id }}" class="device-status offline">Offline</span>
-                                    <button onclick="connectToDevice(this, '{{ device.id }}')" class="btn btn-outline-primary btn-sm">Connect</button>
-                                </div>
-                            </div>
-                            <progress id="progress-{{ device.id }}" value="0" max="100" style="visibility: hidden; width: 100%;"></progress>
-                        </div>
-                    </article>
-                </div>
-            {% endfor %}
-        </div>
+
+<!-- Header Section -->
+<div class="margin:0px; row align-items-center my-4" style="height:50px; background-color: #f8f9fa; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
+  <div class="col-md-2">
+    <a href="{% url 'devices' %}" class="btn btn-secondary" style="background-color: #4a76a8; border: none; border-radius: 5px; font-weight: bold;">&lt;&lt; Back</a>
+  </div>
+  <div class="col-md-8 text-center">
+    <h1 style="font-family: 'Arial', sans-serif; color: #333;">Train Application Demo</h1>
+  </div>
+  <div class="col-md-2"></div>
+</div>
+
+<!-- Track and Tractor Section -->
+<div class="row">
+  <div style="display: flex; flex-direction: column; align-items: center;">
+    <div id="trackContainer">
+      <div id="track">
+        <div id="positionDisplay">1</div>
+        <input type="range" id="positionSlider" min="1" max="1000" value="1" step="1">
+      </div>
+    </div>
+    <div id="tractor"></div>
+
+    <!-- Control Buttons -->
+    <div id="controlButtons">
+      <button id="startButton">Start</button>
+      <button id="stopButton">Stop</button>
+    </div>
   </div>
 </div>
-{% endblock content %}
+
+<!-- System Status Section -->
+<div id="systemStatus">
+  <h3>Current System Status</h3>
+  <div id="mqtt-message">
+    <h3><span id="mqtt-message-content">.</span></h3>
+  </div>
+</div>
+
+<!-- Firmware Info Section -->
+<div class="col-md-3" id="firmwareInfo">
+  <div class="firmware-info">
+    <h4>Current Firmware:<br>Manual Connection</h4>
+    <button class="btn btn-primary">Update</button>
+  </div>
+</div>
+
+<!-- Device Listing Section -->
+<div class="container-fluid" id="deviceList">
+  <div class="row">
+    <div class="col-lg-9">
+      {% for device in devices %}
+      <div class="device-box">
+        <article class="media content-section">
+          <img class="device-image mr-3" src="{% static '/main/'|add:device.model_name|add:'.png' %}" alt="{{ device.model_name }}" width="50">
+          <div class="media-body">
+            <div class="device-control">
+              <h5 class="article-title mb-0"><a href="{% url 'device-detail' device.id %}">{{ device.model_name }}</a></h5>
+              <div>
+                <span id="status-{{ device.id }}" class="device-status offline"></span>
+                <button onclick="connectToDevice(this, '{{ device.id }}')" class="btn btn-outline-primary btn-sm">Connect</button>
+              </div>
+            </div>
+            <progress id="progress-{{ device.id }}" value="0" max="100"></progress>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Styles for Header Section */
+  .header-section {
+    height: 50px;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  }
+
+  .btn-secondary {
+    background-color: #4a76a8;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+
+  /* Styles for Title */
+  .title {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+  }
+
+  /* Styles for Track and Tractor Section */
+  #trackContainer {
+    padding: 20px;
+    margin: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  #positionSlider {
+    width: 80%;
+    display: block;
+    margin: auto;
+  }
+
+  /* Styles for Control Buttons */
+  #controlButtons button {
+    margin-right: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    color: white;
+  }
+
+  #startButton {
+    background-color: #4a76a8;
+  }
+
+  #stopButton {
+    background-color: #6c757d;
+  }
+
+  /* Styles for System Status Section */
+  #systemStatus, #firmwareInfo, .device-box {
+    margin: 5px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  }
+
+  .device-box {
+    height: 90px;
+    width: 315px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #e7e7e7;
+    background-color: #fff;
+  }
+
+  /* Styles for tractor track area */
+  #track {
+    z-index: 2;
+    width: 600px;
+    height: 310px;
+    margin: 20px auto;
+    border: 5px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 150px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #tractor {
+    z-index: 1;
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: green;
+    border-radius: 25%;
+  }
+
+  #positionDisplay {
+    visibility: hidden;
+    position: absolute;
+    font-size: 24px;
+    text-align: center;
+    z-index: 1;
+  }
+</style>
+
+<script>
+  // Function to fetch and update MQTT message
+  function updateMQTTMessage() {
+    fetch('{% url "latest_message" "debug" %}')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('mqtt-message-content').innerText = data.payload;
+      })
+      .catch(error => console.error('Error:', error));
+  }
+
+  // Function to simulate connecting to devices
+  function connectToDevice(button, deviceId) {
+    var progressBar = document.getElementById('progress-' + deviceId);
+    var statusIndicator = document.getElementById('status-' + deviceId);
+
+    progressBar.style.visibility = 'visible';
+    button.disabled = true;
+    var progress = 0;
+    var interval = setInterval(function() {
+      progress += 10;
+      progressBar.value = progress;
+      if (progress >= 100) {
+        clearInterval(interval);
+        progressBar.style.visibility = 'hidden';
+        statusIndicator.textContent = 'Online';
+        statusIndicator.classList.add('online');
+        button.textContent = 'Disconnect';
+        button.disabled = false;
+      }
+    }, 100);
+  }
+
+  function checkMQTTMessage() {
+    fetch('{% url "latest_message" "calibration" %}')
+      .then(response => response.json())
+      .then(data => {
+        if (data.payload === "CAL") {
+          document.getElementById('positionSlider').value = 125;
+          updateTractorPosition(125);
+          postNoMessage();
+        }
+      })
+      .catch(error => console.error('Error:', error));
+  }
+
+  function postNoMessage() {
+    var csrfToken = getCookie('csrftoken');
+    fetch('{% url "send_mqtt_message_no_cal" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify({ message: "NO" })
+    })
+    .then(response => response.json())
+    .then(data => console.log('Message NO sent'))
+    .catch(error => console.error('Error posting NO:', error));
+  }
+
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Tractor movement logic
+  var csrfToken = "{{ csrf_token }}";
+  const tractor = document.getElementById('tractor');
+  const slider = document.getElementById('positionSlider');
+  let moving = false;
+
+  slider.oninput = function() {
+    updateTractorPosition(parseInt(this.value, 10));
+  };
+
+  document.getElementById('startButton').addEventListener('click', function() {
+    moving = true;
+    startMoving();
+  });
+
+  document.getElementById('stopButton').addEventListener('click', function() {
+    moving = false;
+  });
+
+  // Define additional functions like startMoving, updateTractorPosition, etc.
+  // ...
+  
+  // Initial position
+  updateTractorPosition(parseInt(slider.value, 10));
+
+  // Poll for new MQTT messages every 5 seconds
+  setInterval(checkMQTTMessage, 500);
+</script>
+
+{% endblock %}

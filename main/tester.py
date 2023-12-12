@@ -22,6 +22,5 @@ if __name__ == "__main__":
     message = {"to":"cse-in","op":2,"rqi":"LED_ON","rvi":"3","fr":"CAdmin"}
 
     # Call the function to publish the message
-    print("Sending message...")
     send(message)
-    print("Message sent.")
+

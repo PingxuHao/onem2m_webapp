@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MQTT Web Client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.2/mqttws31.min.js" type="text/javascript"></script>
+</head>
+<body>
+    <h2>MQTT Web Client</h2>
+    <div id="messages">
+        <p>Messages will appear here:</p>
+    </div>
+
+    <script type="text/javascript">
+        // Create a client instance
+        var client = new Paho.MQTT.Client("test.mosquitto.org", 8080, "", "clientId" + new Date().getTime());
+
+        // Set callback handlers
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
+
+        // Connect the client
+        client.connect({onSuccess:onConnect});
+
+        // Called when the client connects
+        function onConnect() {
+            // Once a connection has been made, make a subscription
+            console.log("onConnect");
+            client.subscribe("apple");
+        }
+
+        // Called when the client loses its connection
+        function onConnectionLost(responseObject) {
+            if (responseObject.errorCode !== 0) {
+                console.log("onConnectionLost:" + responseObject.errorMessage);
+            }
+        }
+
+        // Called when a message arrives
+        function onMessageArrived(message) {
+            console.log("onMessageArrived:" + message.payloadString);
+            var messagesDiv = document.getElementById("messages");
+            var newMessage = document.createElement("p");
+            newMessage.textContent = "Topic: " + message.destinationName + ", Message: " + message.payloadString;
+            messagesDiv.appendChild(newMessage);
+        }
+    </script>
+</body>
+</html>

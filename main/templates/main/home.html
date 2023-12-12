@@ -1,87 +1,544 @@
 {% extends "main/base.html" %}
 {% load static %}
+
 {% block content %}
 
+<!-- Header Section -->
 <div class="margin:0px; row align-items-center my-4" style="height:50px; background-color: #f8f9fa; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
   <div class="col-md-2">
     <a href="{% url 'devices' %}" class="btn btn-secondary" style="background-color: #4a76a8; border: none; border-radius: 5px; font-weight: bold;">&lt;&lt; Back</a>
   </div>
   <div class="col-md-8 text-center">
-    <h1 style="font-family: 'Arial', sans-serif; color: #333;">APPLICATION NAME</h1>
+    <h1 style="font-family: 'Arial', sans-serif; color: #333;">Train Application Demo</h1>
   </div>
   <div class="col-md-2"></div>
 </div>
 
-
-
-
-
+<!-- Track and Tractor Section -->
 <div class="row">
-  <iframe src="{% static 'main/tester.html' %}" width="650" height="400" style="border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,.1); overflow:hidden; margin-left:20px;" scrolling="no"></iframe>
+  <!-- Container for track and buttons -->
+  <div style="display: flex; flex-direction: column; align-items: center;">
 
+      <!-- Track and Tractor -->
+      <div style="padding: 20px; margin: 20px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+          <div id="track">
+              <div id="positionDisplay">1</div>
+              <input type="range" id="positionSlider" min="1" max="1000" value="1" step="1" style="width: 80%; display: block; margin: auto;">
+          </div>
+      </div>
+    
+      <div id="tractor"></div>
 
-  <div style="margin: 5; padding: 15px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
-    <h3 style="font-family: 'Arial', sans-serif; color: #333;">Current System Status</h3>
+      <!-- Buttons -->
+      <div style="margin-top: 10px;">
+          <button id="startButton" style="margin-right: 5px; padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: #4a76a8; border: none; color: white;">Start</button>
+          <button id="stopButton" style="padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: #6c757d; border: none; color: white;">Stop</button>
+      </div>
+          
+      <div style="margin-top: 10px;">
+        <button id="red" style="margin-right: 5px; padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: rgb(201, 63, 63); border: none; color: white;">Apple</button>
+
+        <button id="blue" style="margin-right: 5px; padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: rgb(75, 75, 198); border: none; color: white;">Blueberry</button>
+        
+        <button id="green" style="padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: rgb(105, 208, 105); border: none; color: white;">Lime</button>
+        
+
+      </div>
   </div>
 
+  <div id="logTerminal" style="background-color: white; color: black; padding: 10px; font-size: 20px; font-weight: bolder;">
+    <h4 style="color: #4a76a8;">System Logs</h4>
+    <div id="logs">Loading logs...</div>
+ </div>
+ 
+ 
 
-  <!-- Firmware and Device List -->
-  <div class="col-md-3" style="margin-left: 0px;">
-    <div class="firmware-info" style="background-color: #f8f9fa; margin-left:15px;  width : 310px; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,.1); display: flex; align-items: center; justify-content: space-between;">
-      <h4 style="color: #555; font-family: 'Arial', sans-serif; margin: 0;">Current Firmware: xxx</h4>
-      <button class="btn btn-primary" style="background-color: #5cb85c; border: none; border-radius: 5px;">Update</button>
-    </div>
-  
-
-    <div class="container-fluid" style="margin-top: 10px;">
-        <div class="row">
-            <div class="col-lg-9">
-                <script>
-                  // Function to simulate connecting to devices
-                  function connectToDevice(button, deviceId) {
-                      var progressBar = document.getElementById('progress-' + deviceId);
-                      var statusIndicator = document.getElementById('status-' + deviceId);
-  
-                      progressBar.style.visibility = 'visible';
-                      button.disabled = true; // Disable the button while connecting
-                      var progress = 0;
-                      var interval = setInterval(function() {
-                          progress += 10;
-                          progressBar.value = progress;
-                          if (progress >= 100) {
-                              clearInterval(interval);
-                              progressBar.style.visibility = 'hidden'; 
-                              statusIndicator.textContent = 'Online';
-                              statusIndicator.classList.add('online');
-                              button.textContent = 'Disconnect';
-                              button.disabled = false; 
-                          }
-                      }, 100);
-                  }
-                </script>
-
-                <!-- Device Listings -->
-                {% for device in devices %}
-                    <div class="device-box" style="height:90px; width: 315px;   margin-bottom: 10px; padding: 10px; ; border: 1px solid #e7e7e7; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,.1); background-color: #fff;">
-                        <article class="media content-section" style="background: transparent; width:300px; border: transparent; font-family: 'Arial', sans-serif; ">
-                            <img class="device-image mr-3" src="{% static '/main/'|add:device.model_name|add:'.png' %}" alt="{{ device.model_name }}" width="50">
-                            <div class="media-body">
-                                <div class="device-control">
-                                    <h5 class="article-title mb-0"><a href="{% url 'device-detail' device.id %}" style="color: #4a76a8;">{{ device.model_name }}</a></h5>
-                                    <div>
-                                        <span id="status-{{ device.id }}" class="device-status offline" style="color: #d9534f;">Offline</span>
-                                        <button onclick="connectToDevice(this, '{{ device.id }}')" class="btn btn-outline-primary btn-sm" style="border-color: #4a76a8; color: #4a76a8; border-radius: 5px;">Connect</button>
-                                    </div>
-                                </div>
-                                <progress id="progress-{{ device.id }}" value="0" max="100" style="visibility: hidden; width: 100%; border-radius: 2px;"></progress>
-                            </div>
-                        </article>
-                    </div>
-                {% endfor %}
-            </div>
+  <div class="col-md-3" style="margin-left: 0px; ">
+      <div class="firmware-info" style="background-color: #f8f9fa; margin-left:15px;  width : 310px; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,.1); display: flex; align-items: center; justify-content: space-between;">
+          <h4 style="color: #555; font-size: 20px;font-family: 'Arial', sans-serif; margin: 0;">
+              Update System
+          </h4>
+          <br>
+          <div><input type="file" id="file_input">
+            <button class="btn btn-primary" id = "update_button" style="background-color: #5cb85c; border: none; border-radius: 5px;">Update</button></div>
+          
       </div>
-    </div>
+
+      <div class="container-fluid" style="margin-top: 10px;">
+          <div class="row">
+              <div class="col-lg-9">
+                  <!-- Device Listings -->
+                  {% for device in devices %}
+                      <div class="device-box" style="height:90px; width: 315px; margin-bottom: 10px; padding: 10px; border: 1px solid #e7e7e7; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,.1); background-color: #fff;">
+                          <article class="media content-section" style="background: transparent; width:300px; border: transparent; font-family: 'Arial', sans-serif; ">
+                              <img class="device-image mr-3" src="{% static '/main/'|add:device.model_name|add:'.png' %}" alt="{{ device.model_name }}" width="50">
+                              <div class="media-body">
+                                  <div class="device-control">
+                                      <h5 class="article-title mb-0"><a href="{% url 'device-detail' device.id %}" style="color: #4a76a8;">{{ device.model_name }}</a></h5>
+                                      <div>
+                                          <span id="status-{{ device.id }}" class="device-status offline" style="color: #d9534f;">Offline</span>
+                                          <button onclick="connectToDevice(this, '{{ device.id }}')" class="btn btn-outline-primary btn-sm" style="border-color: #4a76a8; color: #4a76a8; border-radius: 5px;">Connect</button>
+                                      </div>
+                                  </div>
+                                  <progress id="progress-{{ device.id }}" value="0" max="100" style="visibility: hidden; width: 100%; border-radius: 2px;"></progress>
+                              </div>
+                          </article>
+                      </div>
+                  {% endfor %}
+              </div>
+          </div>
+      </div>
   </div>
 </div>
+
+<style>
+  #logTerminal {
+  background-color: white; /* White background */
+  color: #333; /* Darker text for contrast */
+  padding: 10px;
+  height: 400px; /* Adjust as needed */
+  border: 1px solid #4a76a8; /* Blue border to match the theme */
+  margin-top: 10px; /* Spacing from other elements */
+  width: 450px;
+}
+
+  /* Styles for Header Section */
+  .header-section {
+    height: 50px;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  }
+
+  .btn-secondary {
+    background-color: #4a76a8;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+
+  /* Styles for Title */
+  .title {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+  }
+
+  /* Styles for Track and Tractor Section */
+  #trackContainer {
+    padding: 20px;
+    margin: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  #positionSlider {
+    width: 80%;
+    display: block;
+    margin: auto;
+    visibility: hidden;
+  }
+
+  /* Styles for Control Buttons */
+  #controlButtons button {
+    margin-right: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    color: white;
+  }
+
+  #startButton {
+    background-color: #4a76a8;
+  }
+
+  #stopButton {
+    background-color: #6c757d;
+  }
+
+  /* Styles for System Status Section */
+  #systemStatus, #firmwareInfo, .device-box {
+    margin: 5px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  }
+
+  .device-box {
+    height: 90px;
+    width: 315px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #e7e7e7;
+    background-color: #fff;
+  }
+
+  /* Styles for tractor track area */
+  #track {
+    z-index: 2;
+    width: 600px;
+    height: 310px;
+    margin: 20px auto;
+    border: 5px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 150px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #tractor {
+    z-index: 1;
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-image: url('{% static "/main/tractor.png" %}'); /* Replace with the path to your image */
+    background-size: cover; /* This ensures that your image covers the entire div */
+    border-radius: 25%;
+  }
+
+
+  #positionDisplay {
+    visibility: hidden;
+    position: absolute;
+    font-size: 24px;
+    text-align: center;
+    z-index: 1;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('update_button').addEventListener('click', function() {
+        sendUpdate();
+    });
+});
+  function sendStartTrainMessage() {
+    var csrfToken = getCookie('csrftoken');
+  
+    fetch('{% url "send_mqtt_message_train_run" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({}) // Empty body for the POST requestredapple
+    })
+    .then(response => response.json())
+    .then(data => console.log('Start Train Message Sent:', data))
+    .catch(error => console.error('Error sending Start Train message:', error));
+}
+
+// Function to send the Stop Train MQTT message
+function sendStopTrainMessage() {
+    var csrfToken = getCookie('csrftoken');
+  
+    fetch('{% url "send_mqtt_message_train_stop" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({}) // Empty body for the POST request
+    })
+    .then(response => response.json())
+    .then(data => console.log('Stop Train Message Sent:', data))
+    .catch(error => console.error('Error sending Stop Train message:', error));
+}
+function sendRed() {
+    var csrfToken = getCookie('csrftoken');
+  
+    fetch('{% url "red" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({}) // Empty body for the POST request
+    })
+    .then(response => response.json())
+    .then(data => console.log('Stop Train Message Sent:', data))
+    .catch(error => console.error('Error sending Stop Train message:', error));
+}
+
+function sendGreen() {
+    var csrfToken = getCookie('csrftoken');
+  
+    fetch('{% url "green" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({}) // Empty body for the POST request
+    })
+    .then(response => response.json())
+    .then(data => console.log('Stop Train Message Sent:', data))
+    .catch(error => console.error('Error sending Stop Train message:', error));
+}
+function sendBlue() {
+    var csrfToken = getCookie('csrftoken');
+  
+    fetch('{% url "blue" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({}) // Empty body for the POST request
+    })
+    .then(response => response.json())
+    .then(data => console.log('Stop Train Message Sent:', data))
+    .catch(error => console.error('Error sending Stop Train message:', error));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+function sendUpdate() {
+    var csrfToken = getCookie('csrftoken');
+    var formData = new FormData();
+    var fileInput = document.getElementById('file_input'); 
+
+    if (fileInput && fileInput.files.length > 0) {
+        formData.append('document', fileInput.files[0]);
+    } else {
+        alert('No file selected'); // Alert for no file selection
+        return;
+    }
+
+    fetch('{% url "file_upload" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log('File uploaded and sent successfully:', data);
+        alert('File uploaded and sent successfully'); // Success alert
+    })
+    .catch(error => {
+        console.error('Error in sending file:', error);
+        alert('Error in sending file'); // Error alert
+    });
+}
+
+
+
+
+// Event listeners for Start and Stop buttons
+document.getElementById('startButton').addEventListener('click', function() {
+    sendStartTrainMessage();
+});
+
+document.getElementById('stopButton').addEventListener('click', function() {
+    sendStopTrainMessage();
+});
+
+
+    function updateMQTTMessage() {
+      fetch('{% url "latest_message" "log" %}')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('logs').innerText = data.payload;
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    updateMQTTMessage();
+    // Poll for new messages every 5 seconds
+    setInterval(updateMQTTMessage, 50);
+  
+    // Function to simulate connecting to devices
+    function connectToDevice(button, deviceId) {
+      var progressBar = document.getElementById('progress-' + deviceId);
+      var statusIndicator = document.getElementById('status-' + deviceId);
+  
+      progressBar.style.visibility = 'visible';
+      button.disabled = true;
+      var progress = 0;
+      var interval = setInterval(function() {
+        progress += 10;
+        progressBar.value = progress;
+        if (progress >= 100) {
+          clearInterval(interval);
+          progressBar.style.visibility = 'hidden';
+          statusIndicator.textContent = 'Online';
+          statusIndicator.classList.add('online');
+          button.textContent = 'Disconnect';
+          button.disabled = false;
+        }
+      }, 100);
+    }
+    
+
+
+    function checkMQTTMessage_status() {
+      fetch('{% url "latest_message" "status" %}')
+        .then(response => response.json())
+        .then(data => {
+          if (data.payload === "STOP") {
+            moving = false;
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+
+
+
+
+    // Function to check MQTT message for tractor position
+    function checkMQTTMessage() {
+      fetch('{% url "latest_message" "calibration" %}')
+        .then(response => response.json())
+        .then(data => {
+          if (data.payload === "CAL") {
+            document.getElementById('positionSlider').value = 125;
+            updateTractorPosition(125);
+            postNoMessage();
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+  
+    // Function to post 'NO' message
+    function postNoMessage() {
+      var csrfToken = getCookie('csrftoken');
+  
+      fetch('{% url "send_mqtt_message_no_cal" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ message: "NO" })
+      })
+      .then(response => response.json())
+      .then(data => console.log('Message NO sent'))
+      .catch(error => console.error('Error posting NO:', error));
+    }
+  
+    // Function to get a cookie value
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  
+    // Tractor movement logic
+    var csrfToken = "{{ csrf_token }}";
+    const tractor = document.getElementById('tractor');
+    const slider = document.getElementById('positionSlider');
+    let moving = false;
+  
+    function startMoving() {
+      if (moving) {
+        let currentValue = parseInt(slider.value, 10);
+        currentValue = (currentValue + 1) % 1000;
+        slider.value = currentValue;
+        updateTractorPosition(currentValue);
+        setTimeout(startMoving, 30);
+      }
+    }
+  
+    function updateTractorPosition(position) {
+      position = position / 10;
+
+      position =  Math.abs(101-position);
+      const halfCircleCircumference = Math.PI * 150;
+      const straightLineLength = 300;
+      const totalLength = 2 * halfCircleCircumference + 2 * straightLineLength;  
+      
+      const positionLength = (position / 100) * totalLength;
+      const mod3 = 230
+      
+      let x, y;
+      if (position < 25) {
+          x = (12 * (position- 1));
+          x -= mod3;
+          x += 10;
+          y = 0;
+          
+      } else if ((25 <= position )&& (position<50)) {
+          const angle = 7.2;
+          x = (150 * Math.sin(angle*(position - 25)* (3.141593/180))) + 450;
+          x -= mod3;
+          x -= 160;
+          y = -150 * Math.cos(angle*(position - 25)* (3.141593/180)) + 150;
+
+      } else if ((50 <= position)&&(position <= 75)) {
+          
+          x = 435 - (position - 50)*12;
+          x -= mod3;
+          x -= 110
+          y = 300;
+
+      } else {
+          const angle = 7.2;
+          x = -(150 * Math.sin(angle*(position - 25)* (3.141593/180))) +150;
+          x -= 380;
+          y = 150 * Math.cos(angle*(position - 25)* (3.141593/180)) + 150;
+      }
+      //modidy original pooisition
+      x += 380;
+      y += 110; 
+      
+      tractor.style.left = x + 'px';
+      tractor.style.top = y + 'px';
+
+      positionDisplay.textContent = 'Position: ' + position + ', Coordinates: (' + x.toFixed(2) + ', ' + y.toFixed(2) + ')';
+  }
+  
+    slider.oninput = function() {
+      updateTractorPosition(parseInt(this.value, 10));
+    };
+  
+    document.getElementById('startButton').addEventListener('click', function() {
+      moving = true;
+      startMoving();
+    });
+  
+    document.getElementById('stopButton').addEventListener('click', function() {
+      moving = false;
+    });
+
+    setInterval(checkMQTTMessage_status, 500);
+  
+    // Initial position
+    updateTractorPosition(parseInt(slider.value, 10));
+  
+    // Poll for new MQTT messages every 5 seconds
+    setInterval(checkMQTTMessage, 500);
+    document.getElementById('red').addEventListener('click', function() {
+        sendRed();
+    });document.getElementById('blue').addEventListener('click', function() {
+        sendBlue();
+    });document.getElementById('green').addEventListener('click', function() {
+        sendGreen();
+    });
+  </script>
+  
 
 {% endblock %}

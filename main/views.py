@@ -1,35 +1,150 @@
 from django.shortcuts import render
 from .models import MQTTMessage
-
-# devices/mqtt.py or main/mqtt.py
 from django.http import JsonResponse
+from django.http import HttpResponse
+import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 
-def button_click_ON(request):
-    print("led turned on")
-    # This view is called when the button is clicked
+broker_address = "52.14.47.13"  # Your broker address
+port = 1883
+topic = "update"
+
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+
+def file_upload(request):
     if request.method == 'POST':
-        cmd = "ON"
-        send(cmd)
-        print("led turned on")
-        return JsonResponse({'status': 'Message sent'})
-    else:
-        # Handle unexpected HTTP method
-        print("error at send ")
-        return JsonResponse({'status': 'Error'}, status=405)
-def button_click_OFF(request):
-    print("led turned off")
-    # This view is called when the button is clicked
-    if request.method == 'POST':
-        cmd = "OFF"
-        send(cmd)
-        print("led turned OFF")
-        return JsonResponse({'status': 'Message sent'})
-    else:
-        # Handle unexpected HTTP method
-        print("error at send ")
-        return JsonResponse({'status': 'Error'}, status=405)
+        uploaded_file = request.FILES['document']
+        file_content = uploaded_file.read()
+
+        # Create a client instance
+        client = mqtt.Client()
+        client.on_connect = on_connect
+
+        # Connect to the broker
+        client.connect(broker_address, port, 60)
+
+        # Publish the content
+        client.publish(topic, file_content)
+
+        # Disconnect from the broker
+        client.disconnect()
+
+        return HttpResponse("File uploaded and sent successfully.")
+    return render(request, 'upload.html')
+
+def send(topic,message):
+    MQTT_SERVER = "52.14.47.13"
+    MQTT_PORT = 1883
+    client = mqtt.Client()
+    client.connect(MQTT_SERVER, MQTT_PORT, 60)
+    client.publish(topic, message)
+    client.loop_start()
+    client.disconnect()
+
+def send_mqtt_message(request):
+    broker_address = "52.14.47.13"
+    broker_port = 1883
+    topic = "rpi"
+    message = "START"
+
+    try:
+        publish.single(topic, message, hostname=broker_address, port=broker_port)
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+def send_mqtt_message_no_cal(request):
+    broker_address = "52.14.47.13"
+    broker_port = 1883
+    topic = "train/calibration"
+    message = "NO"
+    try:
+        publish.single(topic, message, hostname=broker_address, port=broker_port)
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+def send_mqtt_message_train_run(request):
+    broker_address = "52.14.47.13"
+    broker_port = 1883
+    topic = "train/command"
+    message = "RUN"
+    try:
+        publish.single(topic, message, hostname=broker_address, port=broker_port)
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+def red(request):
+    broker_address = "52.14.47.13"
+    broker_port = 1883
+    topic = "train/target_color"
+    message = "RED"
+    try:
+        publish.single(topic, message, hostname=broker_address, port=broker_port)
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
     
     
+def blue(request):
+    broker_address = "52.14.47.13"
+    broker_port = 1883
+    topic = "train/target_color"
+    message = "BLUE"
+    try:
+        publish.single(topic, message, hostname=broker_address, port=broker_port)
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+def green(request):
+    broker_address = "52.14.47.13"
+    broker_port = 1883
+    topic = "train/target_color"
+    message = "GREEN"
+    try:
+        publish.single(topic, message, hostname=broker_address, port=broker_port)
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+def send_mqtt_message_train_run_auto(request):
+    broker_address = "52.14.47.13"
+    broker_port = 1883
+    topic = "train/command"
+    message = "RUN_AUTO"
+    try:
+        publish.single(topic, message, hostname=broker_address, port=broker_port)
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})    
+    
+
+def send_mqtt_message_train_stop(request):
+    broker_address = "52.14.47.13"
+    broker_port = 1883
+    topic = "train/command"
+    message = "STOP"
+    try:
+        publish.single(topic, message, hostname=broker_address, port=broker_port)
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+def latest_message(request, topic):
+    if topic == "calibration":
+        message = MQTTMessage.objects.filter(topic="train/calibration").order_by('-timestamp').first()
+    else:
+        message = MQTTMessage.objects.filter(topic=topic).order_by('-timestamp').first()
+    if message:
+        data = {'payload': message.payload}
+    else:
+        data = {'payload': 'No message available'}
+    return JsonResponse(data)
+
+
 def send(cmd):
     import paho.mqtt.client as mqtt
     import json
@@ -49,8 +164,6 @@ def send(cmd):
         "rvi": "3",
         "fr": "CAdmin"
     }
-        
-        
     MQTT_SERVER = "52.14.47.13"
     MQTT_PORT = 1883
     PUBLISH_TOPIC = "/oneM2M/req/aqm/capstone-iot/json"

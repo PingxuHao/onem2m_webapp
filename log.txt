@@ -1,0 +1,10 @@
+14:48:22 Collecting Fruit
+14:48:25 finished collection, train running
+14:48:26 Collecting Fruit
+14:48:29 finished collection, train running
+14:48:29 Collecting Fruit
+14:48:32 finished collection, train running
+14:48:42 Collecting Fruit
+14:48:45 finished collection, train running
+14:49:22 Collecting Fruit
+14:49:25 finished collection, train running
